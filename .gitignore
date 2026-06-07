@@ -1,53 +1,48 @@
-# =============================================================================
-# BelegGuard / Recibo Fácil — repository ignore rules
-# Local-first Expo app. Nothing below is required to BUILD the app; these are
-# caches, build outputs, secrets and agent/tooling artifacts.
-# =============================================================================
-
-# --- Dependencies ------------------------------------------------------------
+# Dependencies
 node_modules/
-/.pnp
+.pnp
 .pnp.js
 .yarn/install-state.gz
 
-# --- Expo / Metro / build outputs --------------------------------------------
+# Expo
 .expo/
 **/.expo/
+expo-env.d.ts
+
+# Metro
 .metro-cache/
 **/.metro-cache/
 .metro-health-check*
+
+# Build outputs
 dist/
 web-build/
-/build
-expo-env.d.ts
+build/
 *.tsbuildinfo
 
-# --- Native build outputs ----------------------------------------------------
+# Native build artifacts
 *.apk
 *.aab
 *.ipa
 **/android/app/build/
 **/ios/build/
 
-# --- Logs --------------------------------------------------------------------
+# Logs
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
 
-# --- Environment & secrets ---------------------------------------------------
+# Environment & secrets
 .env
 .env.*
 *.env
 !.env.example
 credentials.json
-*token.json*
-*credentials.json*
 *.key
 .credentials
 
-# --- Signing material & service accounts (NEVER commit) ----------------------
+# Signing material & service accounts (NEVER commit)
 *.jks
 *.keystore
 *.p8
@@ -59,23 +54,19 @@ google-services.json
 GoogleService-Info.plist
 **/*service-account*.json
 
-# --- Editors & OS ------------------------------------------------------------
+# Editors & OS
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
 
-# --- Python (only relevant to the unused backend scaffolding) ----------------
+# Python (unused backend scaffolding only)
 __pycache__/
 *.pyc
 venv/
 .venv/
 
-# =============================================================================
-# Agent / Emergent / tooling artifacts — NOT part of the Expo app.
-# Kept on disk locally for tooling context, but excluded from the productive
-# app repository / branch.
-# =============================================================================
+# Agent / Emergent / tooling artifacts (not part of the app)
 .emergent/
 memory/
 test_reports/
