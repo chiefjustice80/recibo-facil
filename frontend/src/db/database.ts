@@ -86,7 +86,6 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase | null> {
       return db;
     } catch (e) {
       initError = e as Error;
-      // eslint-disable-next-line no-console
       console.warn("[db] init failed — running without persistence", e);
       return null;
     }

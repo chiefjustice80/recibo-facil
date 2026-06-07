@@ -84,7 +84,6 @@ async function scheduleAt(
     });
     return id;
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.warn("[notify] schedule failed", e);
     return null;
   }

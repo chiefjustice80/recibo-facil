@@ -1,124 +1,83 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# =============================================================================
+# BelegGuard / Recibo Fácil — repository ignore rules
+# Local-first Expo app. Nothing below is required to BUILD the app; these are
+# caches, build outputs, secrets and agent/tooling artifacts.
+# =============================================================================
 
-# IDE and editors
-.idea/
-.vscode/
-
-# Dependencies
+# --- Dependencies ------------------------------------------------------------
 node_modules/
-/node_modules
 /.pnp
 .pnp.js
 .yarn/install-state.gz
-.yarn/*
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/versions
 
-# Testing
-/coverage
-
-# Next.js
-/.next/
-/out/
-next-env.d.ts
-*.tsbuildinfo
-
-# Production builds
-/build
-dist/
-dist
-
-# Environment files (comprehensive coverage)
-
-*token.json*
-*credentials.json*
-
-# Logs and debug files
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-.pnpm-debug.log*
-dump.rdb
-
-# System files
-.DS_Store
-*.pem
-
-# Python
-__pycache__/
-*pyc*
-venv/
-.venv/
-
-# Development tools
-chainlit.md
-.chainlit
-.ipynb_checkpoints/
-.ac
-
-# Deployment
-.vercel
-
-# Data and databases
-agenthub/agents/youtube/db
-
-# Archive files and large assets
-**/*.zip
-**/*.tar.gz
-**/*.tar
-**/*.tgz
-*.pack
-*.deb
-*.dylib
-
-# Build caches
-.cache/
-
-memory/test_credentials.md
-
-# Mobile development
-android-sdk/
-.env
-.env.*
-*.env
-credentials.json
-*.key
-.credentials
-
-# ---------------------------------------------------------------------------
-# Expo / React Native build & cache artifacts (must never be committed)
-# ---------------------------------------------------------------------------
+# --- Expo / Metro / build outputs --------------------------------------------
 .expo/
 **/.expo/
 .metro-cache/
 **/.metro-cache/
 .metro-health-check*
-web-build/
-**/web-build/
 dist/
-**/dist/
-*.log
+web-build/
+/build
+expo-env.d.ts
+*.tsbuildinfo
 
-# Android / iOS native build outputs
-**/android/app/build/
-**/ios/build/
+# --- Native build outputs ----------------------------------------------------
 *.apk
 *.aab
 *.ipa
+**/android/app/build/
+**/ios/build/
 
-# Signing material & service accounts (NEVER commit secrets)
+# --- Logs --------------------------------------------------------------------
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# --- Environment & secrets ---------------------------------------------------
+.env
+.env.*
+*.env
+!.env.example
+credentials.json
+*token.json*
+*credentials.json*
+*.key
+.credentials
+
+# --- Signing material & service accounts (NEVER commit) ----------------------
 *.jks
 *.keystore
 *.p8
 *.p12
+*.pem
+*.crt
 *.mobileprovision
 google-services.json
 GoogleService-Info.plist
 **/*service-account*.json
 
-# Agent / tooling artifacts (not part of the app)
+# --- Editors & OS ------------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# --- Python (only relevant to the unused backend scaffolding) ----------------
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# =============================================================================
+# Agent / Emergent / tooling artifacts — NOT part of the Expo app.
+# Kept on disk locally for tooling context, but excluded from the productive
+# app repository / branch.
+# =============================================================================
+.emergent/
+memory/
 test_reports/
 test_result.md
 design_guidelines.json

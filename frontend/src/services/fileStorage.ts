@@ -1,50 +1,46 @@
-import * as FileSystem from "expo-file-system/legacy";
+import { Directory, File, Paths } from "expo-file-system";
 import { Platform } from "react-native";
 
 import { genId } from "../db/database";
 
 // Receipt photos live in the app's private document directory. Only the path
-// is stored in SQLite — never the binary. On web (preview) the source URI is
-// returned as-is since there is no persistent document directory.
+// is stored in SQLite — never the binary. Uses the modern (SDK 54) synchronous
+// expo-file-system API. Web uses fileStorage.web.ts (Metro resolves it there).
 
-const DIR =
-  Platform.OS === "web"
-    ? null
-    : (FileSystem.documentDirectory || "") + "receipts/";
+const receiptsDir =
+  Platform.OS === "web" ? null : new Directory(Paths.document, "receipts");
 
-async function ensureDir(): Promise<void> {
-  if (!DIR) return;
+function ensureDir(): void {
+  if (!receiptsDir) return;
   try {
-    const info = await FileSystem.getInfoAsync(DIR);
-    if (!info.exists) {
-      await FileSystem.makeDirectoryAsync(DIR, { intermediates: true });
-    }
+    if (!receiptsDir.exists) receiptsDir.create({ intermediates: true });
   } catch {
     // ignore
   }
 }
 
 export async function saveReceiptImage(srcUri: string): Promise<string> {
-  if (Platform.OS === "web" || !DIR) return srcUri;
+  if (!receiptsDir) return srcUri;
   try {
-    await ensureDir();
+    ensureDir();
     const ext = (srcUri.split(".").pop() || "jpg").split("?")[0].slice(0, 5);
-    const dest = `${DIR}${genId()}.${ext}`;
-    await FileSystem.copyAsync({ from: srcUri, to: dest });
-    return dest;
+    const src = new File(srcUri);
+    const dest = new File(receiptsDir, `${genId()}.${ext}`);
+    if (dest.exists) dest.delete();
+    src.copy(dest);
+    return dest.uri;
   } catch (e) {
-    // eslint-disable-next-line no-console
     console.warn("[files] save failed, keeping source uri", e);
     return srcUri;
   }
 }
 
 export async function deleteFiles(paths: string[]): Promise<void> {
-  if (Platform.OS === "web") return;
   for (const p of paths) {
     if (!p || !p.startsWith("file")) continue;
     try {
-      await FileSystem.deleteAsync(p, { idempotent: true });
+      const f = new File(p);
+      if (f.exists) f.delete();
     } catch {
       // ignore
     }
