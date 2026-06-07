@@ -1,22 +1,31 @@
 {
   "expo": {
-    "name": "frontend",
+    "name": "BelegGuard",
     "slug": "frontend",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "frontend",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Scan barcodes and photograph receipts",
+        "NSPhotoLibraryUsageDescription": "Attach receipt photos from your gallery"
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#000"
+        "backgroundColor": "#2B5A50"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.POST_NOTIFICATIONS"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -31,10 +40,29 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#000"
+          "backgroundColor": "#2B5A50"
         }
       ],
-      "expo-font"
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Scan barcodes and photograph receipts"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Attach receipt photos from your gallery",
+          "cameraPermission": "Photograph receipts to store them"
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "color": "#2B5A50"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

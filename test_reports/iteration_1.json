@@ -1,0 +1,41 @@
+{
+  "summary": "Frontend-only testing for Recibo Fácil / BelegGuard Expo web preview. Tested all 9 requested flows on mobile viewport (390x844). Result: 8/9 flows pass fully. Home renders both action cards and Expiring/Recent sections; add/edit product, add/edit receipt, status filter chips, FABs (inventory-fab, receipts-fab), search (by name, brand, merchant) with clear, language switching DE/PT-BR/EN/auto with real UI text changes, default reminders chips, and navigation across all 5 tabs all work. Zero runtime console ERRORS observed (only deprecation warnings). One bug: DELETE confirmation (Alert.alert with cancel+destructive buttons) is non-functional on web preview — no dialog/modal renders and the onPress callback never fires, so inv-delete and rec-delete cannot actually delete the entity through the web UI. RN-web deprecation warnings detected: shadow*, textShadow*, props.pointerEvents.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "inventory/add.tsx & receipts/add.tsx",
+        "issue": "Delete confirmation uses React Native Alert.alert([Cancel, Destructive]) which is not supported on react-native-web for multi-button dialogs. On the web preview, tapping inv-delete or rec-delete shows NO dialog and never invokes the destructive callback, so items cannot be deleted through web. Native (Android) is unaffected.",
+        "testID": "inv-delete, rec-delete",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": [
+      {"component": "Alert.alert (multi-button)", "issue": "react-native-web does not properly support Alert.alert with multiple buttons (destructive callback never fires). Use Platform.OS check + window.confirm on web, or a custom <Modal> confirmation. Reference: /app/frontend/app/inventory/add.tsx:162-177 and /app/frontend/app/receipts/add.tsx:166-182"},
+      {"component": "shadow* style props", "issue": "Console warning: '\"shadow*\" style props are deprecated. Use \"boxShadow\".' — likely from theme/shadow definitions. Reference: /app/frontend/src/theme (shadow.card / shadow.floating used in (tabs)/index.tsx, inventory.tsx, receipts.tsx)"},
+      {"component": "textShadow* style props", "issue": "Console warning: '\"textShadow*\" style props are deprecated. Use \"textShadow\".' Reference: likely in /app/frontend/src/theme or AppText component."},
+      {"component": "props.pointerEvents", "issue": "Console warning: 'props.pointerEvents is deprecated. Use style.pointerEvents'. Likely from a 3rd-party (keyboard-controller / safe-area). Low priority but worth checking."}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix delete confirmation for web: wrap Alert.alert in Platform.OS check and use window.confirm() on web, OR replace with a custom in-app <Modal> confirmation. Apply to both /app/frontend/app/inventory/add.tsx handleDelete and /app/frontend/app/receipts/add.tsx handleDelete.",
+    "Migrate shadow* and textShadow* style props in theme to the new boxShadow/textShadow API to clear deprecation warnings on web (does not affect functionality on native).",
+    "Verify which dependency is still passing props.pointerEvents (likely third-party); upgrade if available."
+  ],
+  "critical_code_review_comments": [
+    "Good test coverage of testIDs across all interactive elements — automated UI testing is straightforward.",
+    "AppContext.refresh() + dataVersion + useFocusEffect pattern correctly invalidates lists after CRUD — observed live update on Pantry list when product moved from active->consumed.",
+    "Search debouncing is not implemented (runs on every keystroke), but localStorage layer is fast enough so this is fine for offline-first scope.",
+    "On web, default currency falls back to EUR for both 'de' and any non 'pt-BR' locale — confirm intentional (English users may expect USD/GBP defaults, but spec only required DE/PT-BR/EN where EUR is acceptable)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (no backend tested per request)", "frontend": "89% (8/9 flows fully pass; delete confirmation broken on web only)"},
+  "seed_data_creation": "Tests created and cleaned up ephemeral data in localStorage within each browser session (TEST_ prefixed items, Yogurt/Danone product, MyWashingMachine/MediaMarkt receipt).",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "All testIDs are correct and selectable as data-testid on web. Use mobile viewport 390x844. Each new browser_automation call gets a fresh localStorage so any CRUD test must create+act+verify within the same session. Native-only features SKIPPED per request: camera barcode (BarcodeScannerModal shows fallback on web), real photo capture (expo-image-picker), and local push scheduling (no-op on web). The delete-on-web bug is the only failing scenario.",
+  "rca_of_issue": "DELETE on web: react-native-web ships an Alert polyfill that, for Alert.alert(title, message, buttons), only handles single-button alerts via window.alert. With cancel+destructive buttons (as used here), no DOM dialog is rendered and the onPress callback never executes, leaving the entity intact. Reproduction: load /inventory, tap a row, tap inv-delete on web → nothing happens; row remains. Mitigation: in handleDelete use `if (Platform.OS === 'web') { if (window.confirm(t('inventory.deleteConfirm'))) { /* do delete */ } } else { Alert.alert(...) }` OR replace with a custom <Modal> confirmation component for cross-platform consistency."
+}
