@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
 import {
-  Alert,
   StyleSheet,
   TouchableOpacity,
   View,
@@ -25,6 +24,7 @@ import {
 import { AppText, Button, Chip, Field } from "@/src/components/ui";
 import { AppInput, DateField } from "@/src/components/inputs";
 import { BarcodeScannerModal } from "@/src/components/BarcodeScannerModal";
+import { confirmAction } from "@/src/utils/confirm";
 import { useApp } from "@/src/context/AppContext";
 import { colors, radius, spacing } from "@/src/theme";
 import {
@@ -161,19 +161,17 @@ export default function InventoryAddScreen() {
 
   const handleDelete = useCallback(() => {
     if (!params.id) return;
-    Alert.alert(t("inventory.deleteConfirm"), "", [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("common.delete"),
-        style: "destructive",
-        onPress: async () => {
-          await cancelEntityReminders("inventory", params.id!);
-          await deleteInventoryItem(params.id!);
-          refresh();
-          router.back();
-        },
+    confirmAction(t("inventory.deleteConfirm"), {
+      confirmLabel: t("common.delete"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+      onConfirm: async () => {
+        await cancelEntityReminders("inventory", params.id!);
+        await deleteInventoryItem(params.id!);
+        refresh();
+        router.back();
       },
-    ]);
+    });
   }, [params.id, t, refresh, router]);
 
   return (

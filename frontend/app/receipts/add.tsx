@@ -31,6 +31,7 @@ import {
   cancelAllReceiptReminders,
 } from "@/src/services/notifications";
 import { saveReceiptImage, deleteFiles } from "@/src/services/fileStorage";
+import { confirmAction } from "@/src/utils/confirm";
 
 function defaultCurrency(locale: string): string {
   if (locale === "de") return "EUR";
@@ -165,20 +166,18 @@ export default function ReceiptAddScreen() {
 
   const handleDelete = useCallback(() => {
     if (!params.id) return;
-    Alert.alert(t("receipts.deleteConfirm"), "", [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("common.delete"),
-        style: "destructive",
-        onPress: async () => {
-          await cancelAllReceiptReminders(params.id!);
-          const paths = await deleteReceipt(params.id!);
-          await deleteFiles(paths);
-          refresh();
-          router.back();
-        },
+    confirmAction(t("receipts.deleteConfirm"), {
+      confirmLabel: t("common.delete"),
+      cancelLabel: t("common.cancel"),
+      destructive: true,
+      onConfirm: async () => {
+        await cancelAllReceiptReminders(params.id!);
+        const paths = await deleteReceipt(params.id!);
+        await deleteFiles(paths);
+        refresh();
+        router.back();
       },
-    ]);
+    });
   }, [params.id, t, refresh, router]);
 
   return (
