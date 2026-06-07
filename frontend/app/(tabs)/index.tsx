@@ -78,7 +78,13 @@ export default function HomeScreen() {
             <View style={styles.actionIcon}>
               <ScanLine size={24} color={colors.white} strokeWidth={1.9} />
             </View>
-            <AppText variant="h3" color={colors.white} style={styles.actionTitle}>
+            <AppText
+              variant="h3"
+              color={colors.white}
+              style={styles.actionTitle}
+              numberOfLines={2}
+              adjustsFontSizeToFit
+            >
               {t("home.scanFood")}
             </AppText>
             <AppText variant="small" color="rgba(255,255,255,0.8)">
@@ -95,7 +101,13 @@ export default function HomeScreen() {
             <View style={styles.actionIcon}>
               <Camera size={24} color={colors.white} strokeWidth={1.9} />
             </View>
-            <AppText variant="h3" color={colors.white} style={styles.actionTitle}>
+            <AppText
+              variant="h3"
+              color={colors.white}
+              style={styles.actionTitle}
+              numberOfLines={2}
+              adjustsFontSizeToFit
+            >
               {t("home.saveReceipt")}
             </AppText>
             <AppText variant="small" color="rgba(255,255,255,0.85)">
@@ -214,7 +226,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginBottom: spacing.lg,
   },
-  actionTitle: { marginBottom: 2 },
+  actionTitle: { marginBottom: 2, fontSize: 18 },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
