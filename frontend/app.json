@@ -1,21 +1,23 @@
 {
   "expo": {
     "name": "BelegGuard",
-    "slug": "frontend",
+    "slug": "belegguard",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "frontend",
+    "scheme": "belegguard",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.facillabs.belegguard",
       "infoPlist": {
         "NSCameraUsageDescription": "Scan barcodes and photograph receipts",
         "NSPhotoLibraryUsageDescription": "Attach receipt photos from your gallery"
       }
     },
     "android": {
+      "package": "com.facillabs.belegguard",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#2B5A50"
@@ -37,7 +39,7 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
           "backgroundColor": "#2B5A50"

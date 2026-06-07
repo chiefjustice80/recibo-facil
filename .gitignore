@@ -86,3 +86,39 @@ android-sdk/
 credentials.json
 *.key
 .credentials
+
+# ---------------------------------------------------------------------------
+# Expo / React Native build & cache artifacts (must never be committed)
+# ---------------------------------------------------------------------------
+.expo/
+**/.expo/
+.metro-cache/
+**/.metro-cache/
+.metro-health-check*
+web-build/
+**/web-build/
+dist/
+**/dist/
+*.log
+
+# Android / iOS native build outputs
+**/android/app/build/
+**/ios/build/
+*.apk
+*.aab
+*.ipa
+
+# Signing material & service accounts (NEVER commit secrets)
+*.jks
+*.keystore
+*.p8
+*.p12
+*.mobileprovision
+google-services.json
+GoogleService-Info.plist
+**/*service-account*.json
+
+# Agent / tooling artifacts (not part of the app)
+test_reports/
+test_result.md
+design_guidelines.json
