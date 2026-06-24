@@ -1,4 +1,10 @@
 import { initDatabase, genId, nowISO } from "./database";
+import {
+  buildMatchExpr,
+  isFtsAvailable,
+  removeReceiptFts,
+  syncReceiptFts,
+} from "./fts";
 import { Receipt } from "./types";
 
 interface Row {
@@ -91,6 +97,18 @@ export async function upsertReceipt(input: ReceiptInput): Promise<string> {
     : null;
   const createdAt = existing?.created_at ?? now;
 
+  const fields = {
+    title: input.title.trim(),
+    merchant: input.merchant?.trim() || null,
+    purchase_date: input.purchase_date ?? null,
+    amount: input.amount ?? null,
+    currency: input.currency?.trim() || null,
+    category: input.category?.trim() || null,
+    warranty_until: input.warranty_until ?? null,
+    return_until: input.return_until ?? null,
+    notes: input.notes?.trim() || null,
+  };
+
   await db.runAsync(
     `INSERT OR REPLACE INTO receipts
       (id, title, merchant, purchase_date, amount, currency, category,
@@ -98,19 +116,20 @@ export async function upsertReceipt(input: ReceiptInput): Promise<string> {
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
-      input.title.trim(),
-      input.merchant?.trim() || null,
-      input.purchase_date ?? null,
-      input.amount ?? null,
-      input.currency?.trim() || null,
-      input.category?.trim() || null,
-      input.warranty_until ?? null,
-      input.return_until ?? null,
-      input.notes?.trim() || null,
+      fields.title,
+      fields.merchant,
+      fields.purchase_date,
+      fields.amount,
+      fields.currency,
+      fields.category,
+      fields.warranty_until,
+      fields.return_until,
+      fields.notes,
       createdAt,
       now,
     ],
   );
+  await syncReceiptFts(db, { id, ...fields });
   return id;
 }
 
@@ -124,6 +143,7 @@ export async function deleteReceipt(id: string): Promise<string[]> {
   await db.runAsync(`DELETE FROM receipt_images WHERE receipt_id = ?`, [id]);
   await db.runAsync(`DELETE FROM receipt_ocr_text WHERE receipt_id = ?`, [id]);
   await db.runAsync(`DELETE FROM receipts WHERE id = ?`, [id]);
+  await removeReceiptFts(db, id);
   return images.map((i) => i.file_path);
 }
 
@@ -147,16 +167,45 @@ export async function setReceiptImage(
 export async function searchReceipts(query: string): Promise<Receipt[]> {
   const db = await initDatabase();
   if (!db) return [];
-  const q = `%${query.trim()}%`;
-  const rows = await db.getAllAsync<Row>(
-    `SELECT r.*, (
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  const imageSubquery = `(
         SELECT file_path FROM receipt_images ri
         WHERE ri.receipt_id = r.id ORDER BY ri.created_at ASC LIMIT 1
-     ) as image_path
+     ) as image_path`;
+
+  // Preferred: FTS5 full-text search.
+  if (isFtsAvailable()) {
+    const expr = buildMatchExpr(trimmed);
+    if (expr) {
+      try {
+        const rows = await db.getAllAsync<Row>(
+          `SELECT r.*, ${imageSubquery}
+           FROM receipts r
+           JOIN receipts_fts f ON f.id = r.id
+           WHERE receipts_fts MATCH ?
+           ORDER BY r.created_at DESC`,
+          [expr],
+        );
+        return rows.map(mapRow);
+      } catch (e) {
+        console.warn("[fts] receipt search failed — using LIKE", e);
+      }
+    }
+  }
+
+  // Fallback: LIKE search.
+  const q = `%${trimmed}%`;
+  const rows = await db.getAllAsync<Row>(
+    `SELECT r.*, ${imageSubquery}
      FROM receipts r
-     WHERE r.title LIKE ? OR r.merchant LIKE ? OR r.category LIKE ? OR r.notes LIKE ?
+     WHERE r.title LIKE ? OR r.merchant LIKE ? OR r.category LIKE ?
+        OR r.notes LIKE ? OR CAST(r.amount AS TEXT) LIKE ?
+        OR r.purchase_date LIKE ? OR r.warranty_until LIKE ?
+        OR r.return_until LIKE ?
      ORDER BY r.created_at DESC`,
-    [q, q, q, q],
+    [q, q, q, q, q, q, q, q],
   );
   return rows.map(mapRow);
 }

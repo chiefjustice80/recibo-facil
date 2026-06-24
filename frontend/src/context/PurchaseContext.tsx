@@ -51,7 +51,7 @@ export function PurchaseProvider({ children }: { children: React.ReactNode }) {
   // Load the persisted entitlement once (works offline / on every platform).
   useEffect(() => {
     (async () => {
-      const stored = await storage.getItem(KEY_OWNS, "false");
+      const stored = await storage.getItem<string>(KEY_OWNS, "false");
       setOwnsState(stored === "true");
       setReady(true);
     })();

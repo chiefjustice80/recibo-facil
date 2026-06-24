@@ -1,5 +1,7 @@
 import * as SQLite from "expo-sqlite";
 
+import { setupFts } from "./fts";
+
 // Single shared connection. Initialization is resilient: if the platform does
 // not support SQLite (e.g. the web preview without the wasm asset), the app
 // still boots and screens render empty states instead of crashing.
@@ -82,6 +84,9 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase | null> {
     try {
       const db = await SQLite.openDatabaseAsync("belegguard.db");
       await db.execAsync(SCHEMA);
+      // Build the full-text index (best-effort; falls back to LIKE if FTS5 is
+      // unavailable). Never blocks app boot.
+      await setupFts(db);
       dbInstance = db;
       return db;
     } catch (e) {

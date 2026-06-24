@@ -1,4 +1,10 @@
 import { initDatabase, genId, nowISO } from "./database";
+import {
+  buildMatchExpr,
+  isFtsAvailable,
+  removeInventoryFts,
+  syncInventoryFts,
+} from "./fts";
 import { InventoryItem, ItemStatus, StorageLocation } from "./types";
 
 interface Row {
@@ -95,6 +101,16 @@ export async function upsertInventoryItem(
     : null;
   const createdAt = existing?.created_at ?? now;
 
+  const fields = {
+    barcode: input.barcode ?? null,
+    name: input.name.trim(),
+    brand: input.brand?.trim() || null,
+    quantity: input.quantity?.trim() || null,
+    storage_location: input.storage_location ?? "pantry",
+    expiry_date: input.expiry_date ?? null,
+    status: input.status ?? "active",
+  };
+
   await db.runAsync(
     `INSERT OR REPLACE INTO inventory_items
       (id, barcode, name, brand, quantity, storage_location, expiry_date,
@@ -102,19 +118,20 @@ export async function upsertInventoryItem(
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
-      input.barcode ?? null,
-      input.name.trim(),
-      input.brand?.trim() || null,
-      input.quantity?.trim() || null,
-      input.storage_location ?? "pantry",
-      input.expiry_date ?? null,
-      input.status ?? "active",
+      fields.barcode,
+      fields.name,
+      fields.brand,
+      fields.quantity,
+      fields.storage_location,
+      fields.expiry_date,
+      fields.status,
       JSON.stringify(input.reminder_offsets ?? [1]),
       input.image_path ?? null,
       createdAt,
       now,
     ],
   );
+  await syncInventoryFts(db, { id, ...fields });
   return id;
 }
 
@@ -134,6 +151,7 @@ export async function deleteInventoryItem(id: string): Promise<void> {
   const db = await initDatabase();
   if (!db) return;
   await db.runAsync(`DELETE FROM inventory_items WHERE id = ?`, [id]);
+  await removeInventoryFts(db, id);
 }
 
 export async function searchInventory(
@@ -141,12 +159,36 @@ export async function searchInventory(
 ): Promise<InventoryItem[]> {
   const db = await initDatabase();
   if (!db) return [];
-  const q = `%${query.trim()}%`;
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  // Preferred: FTS5 full-text search.
+  if (isFtsAvailable()) {
+    const expr = buildMatchExpr(trimmed);
+    if (expr) {
+      try {
+        const rows = await db.getAllAsync<Row>(
+          `SELECT ii.* FROM inventory_items ii
+           JOIN inventory_fts f ON f.id = ii.id
+           WHERE inventory_fts MATCH ?
+           ORDER BY (ii.expiry_date IS NULL) ASC, ii.expiry_date ASC, ii.name ASC`,
+          [expr],
+        );
+        return rows.map(mapRow);
+      } catch (e) {
+        console.warn("[fts] inventory search failed — using LIKE", e);
+      }
+    }
+  }
+
+  // Fallback: LIKE search (FTS unavailable, tokenless query, or query error).
+  const q = `%${trimmed}%`;
   const rows = await db.getAllAsync<Row>(
     `SELECT * FROM inventory_items
      WHERE name LIKE ? OR barcode LIKE ? OR brand LIKE ?
-     ORDER BY (expiry_date IS NULL) ASC, expiry_date ASC`,
-    [q, q, q],
+        OR quantity LIKE ? OR storage_location LIKE ?
+     ORDER BY (expiry_date IS NULL) ASC, expiry_date ASC, name ASC`,
+    [q, q, q, q, q],
   );
   return rows.map(mapRow);
 }
