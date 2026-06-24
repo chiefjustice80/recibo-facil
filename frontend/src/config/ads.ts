@@ -19,6 +19,10 @@ import { isPremium } from "@/src/config/limits";
 // future in-app purchase can simply flip `isPremium` to remove all ads.
 export const ADS_ENABLED = true;
 
+// Use Google's TEST ad units in development builds to avoid invalid-traffic
+// strikes on the real AdMob account; serve real ads only in production builds.
+export const USE_TEST_ADS = __DEV__;
+
 export function shouldShowAds(): boolean {
   return ADS_ENABLED && !isPremium;
 }

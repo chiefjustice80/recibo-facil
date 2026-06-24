@@ -65,19 +65,21 @@
           "color": "#2B5A50"
         }
       ],
-      "react-native-google-mobile-ads"
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-5342483457965327~1324951265",
+          "iosAppId": "ca-app-pub-5342483457965327~1324951265"
+        }
+      ]
     ],
     "extra": {
       "ads": {
-        "bannerUnitId": null
+        "bannerUnitId": "ca-app-pub-5342483457965327/8872690259"
       }
     },
     "experiments": {
       "typedRoutes": true
     }
-  },
-  "react-native-google-mobile-ads": {
-    "android_app_id": "ca-app-pub-3940256099942544~3347511713",
-    "ios_app_id": "ca-app-pub-3940256099942544~1458002511"
   }
 }

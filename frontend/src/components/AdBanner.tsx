@@ -6,7 +6,7 @@ import mobileAds, {
   TestIds,
 } from "react-native-google-mobile-ads";
 
-import { getProductionBannerUnitId, shouldShowAds } from "@/src/config/ads";
+import { getProductionBannerUnitId, shouldShowAds, USE_TEST_ADS } from "@/src/config/ads";
 import { colors } from "@/src/theme";
 
 // Initialize the Google Mobile Ads SDK exactly once for the whole app.
@@ -21,8 +21,11 @@ function ensureSdkInitialized() {
     });
 }
 
-// Use the real production unit ID when configured, otherwise Google's test ID.
-const BANNER_UNIT_ID = getProductionBannerUnitId() ?? TestIds.BANNER;
+// In dev builds always use the official Google test unit; in production use the
+// configured real banner unit ID (falling back to the test unit if unset).
+const BANNER_UNIT_ID = USE_TEST_ADS
+  ? TestIds.BANNER
+  : getProductionBannerUnitId() ?? TestIds.BANNER;
 
 export function AdBanner() {
   const [failed, setFailed] = useState(false);
