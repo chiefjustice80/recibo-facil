@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "BelegGuard",
+    "name": "Organiza",
     "slug": "belegguard",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -20,7 +20,7 @@
       "package": "com.facillabs.belegguard",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#2B5A50"
+        "backgroundColor": "#EBF7F5"
       },
       "edgeToEdgeEnabled": true,
       "permissions": [
@@ -42,7 +42,7 @@
           "image": "./assets/images/splash-image.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#2B5A50"
+          "backgroundColor": "#EBF7F5"
         }
       ],
       "expo-font",
@@ -64,7 +64,8 @@
         {
           "color": "#2B5A50"
         }
-      ]
+      ],
+      "react-native-google-mobile-ads"
     ],
     "experiments": {
       "typedRoutes": true

@@ -25,7 +25,7 @@ export async function lookupBarcode(
     const res = await fetch(url, {
       signal: controller.signal,
       headers: {
-        "User-Agent": "BelegGuard/1.0 (Facil Labs; local-first app)",
+        "User-Agent": "Organiza/1.0 (Facil Labs; local-first app)",
       },
     });
     if (!res.ok) return null;

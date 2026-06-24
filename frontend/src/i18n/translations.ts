@@ -4,7 +4,7 @@
 export const translations = {
   en: {
     common: {
-      appName: "BelegGuard",
+      appName: "Organiza",
       save: "Save",
       cancel: "Cancel",
       delete: "Delete",
@@ -137,7 +137,7 @@ export const translations = {
       preferences: "Preferences",
       about: "About",
       aboutText:
-        "BelegGuard / Recibo Fácil by Facil Labs. Manage food expiry and store receipts & warranties — all on your device.",
+        "Organiza by Facil Labs. Manage food expiry and store receipts & warranties — all on your device.",
       privacy: "Privacy",
       privacyText:
         "All data stays on this device. No account, no servers, no tracking.",
@@ -170,7 +170,7 @@ export const translations = {
 
   de: {
     common: {
-      appName: "BelegGuard",
+      appName: "Organiza",
       save: "Speichern",
       cancel: "Abbrechen",
       delete: "Löschen",
@@ -303,7 +303,7 @@ export const translations = {
       preferences: "Einstellungen",
       about: "Über",
       aboutText:
-        "BelegGuard / Recibo Fácil von Facil Labs. Verwalte Ablaufdaten und speichere Belege & Garantien — alles auf deinem Gerät.",
+        "Organiza von Facil Labs. Verwalte Ablaufdaten und speichere Belege & Garantien — alles auf deinem Gerät.",
       privacy: "Datenschutz",
       privacyText:
         "Alle Daten bleiben auf diesem Gerät. Kein Account, keine Server, kein Tracking.",
@@ -336,7 +336,7 @@ export const translations = {
 
   "pt-BR": {
     common: {
-      appName: "Recibo Fácil",
+      appName: "OrganizaJá",
       save: "Salvar",
       cancel: "Cancelar",
       delete: "Excluir",
@@ -469,7 +469,7 @@ export const translations = {
       preferences: "Preferências",
       about: "Sobre",
       aboutText:
-        "Recibo Fácil / BelegGuard da Facil Labs. Gerencie validades e guarde recibos e garantias — tudo no seu aparelho.",
+        "OrganizaJá da Facil Labs. Gerencie validades e guarde recibos e garantias — tudo no seu aparelho.",
       privacy: "Privacidade",
       privacyText:
         "Todos os dados ficam neste aparelho. Sem conta, sem servidores, sem rastreamento.",
