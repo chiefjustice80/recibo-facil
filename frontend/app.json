@@ -2,22 +2,24 @@
   "expo": {
     "name": "Organiza",
     "slug": "belegguard",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "belegguard",
+    "scheme": "organiza",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.facillabs.belegguard",
+      "bundleIdentifier": "com.facillabs.organiza",
+      "buildNumber": "2",
       "infoPlist": {
         "NSCameraUsageDescription": "Scan barcodes and photograph receipts",
         "NSPhotoLibraryUsageDescription": "Attach receipt photos from your gallery"
       }
     },
     "android": {
-      "package": "com.facillabs.belegguard",
+      "package": "com.facillabs.organiza",
+      "versionCode": 2,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#EBF7F5"

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
+import Constants from "expo-constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   Languages,
@@ -250,7 +251,7 @@ export default function SettingsScreen() {
           {t("settings.aboutText")}
         </AppText>
         <AppText variant="small" color={colors.textMuted} style={styles.version}>
-          {t("settings.version")} 1.0.0
+          {t("settings.version")} {Constants.expoConfig?.version ?? "1.1.0"}
         </AppText>
       </ScrollView>
     </View>
