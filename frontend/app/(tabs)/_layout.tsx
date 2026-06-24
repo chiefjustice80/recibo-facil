@@ -1,3 +1,4 @@
+import { BottomTabBar } from "@react-navigation/bottom-tabs";
 import { Tabs } from "expo-router";
 import {
   House,
@@ -6,8 +7,10 @@ import {
   Search,
   Settings as SettingsIcon,
 } from "lucide-react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AdBanner } from "@/src/components/AdBanner";
 import { useApp } from "@/src/context/AppContext";
 import { colors, fonts } from "@/src/theme";
 
@@ -17,6 +20,12 @@ export default function TabsLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => (
+        <View>
+          <AdBanner />
+          <BottomTabBar {...props} />
+        </View>
+      )}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
