@@ -16,6 +16,7 @@ import {
 
 import { useIconFonts } from "@/src/hooks/use-icon-fonts";
 import { AppProvider } from "@/src/context/AppContext";
+import { PurchaseProvider } from "@/src/context/PurchaseContext";
 import { colors } from "@/src/theme";
 
 // Keep the native splash visible from cold start until icon fonts register.
@@ -46,23 +47,25 @@ export default function RootLayout() {
       <SafeAreaProvider>
         <KeyboardProvider>
           <AppProvider>
-            <StatusBar style="dark" />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.background },
-              }}
-            >
-              <Stack.Screen name="(tabs)" />
-              <Stack.Screen
-                name="inventory/add"
-                options={{ presentation: "modal" }}
-              />
-              <Stack.Screen
-                name="receipts/add"
-                options={{ presentation: "modal" }}
-              />
-            </Stack>
+            <PurchaseProvider>
+              <StatusBar style="dark" />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.background },
+                }}
+              >
+                <Stack.Screen name="(tabs)" />
+                <Stack.Screen
+                  name="inventory/add"
+                  options={{ presentation: "modal" }}
+                />
+                <Stack.Screen
+                  name="receipts/add"
+                  options={{ presentation: "modal" }}
+                />
+              </Stack>
+            </PurchaseProvider>
           </AppProvider>
         </KeyboardProvider>
       </SafeAreaProvider>

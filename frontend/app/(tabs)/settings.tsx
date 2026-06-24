@@ -11,8 +11,9 @@ import {
   Check,
 } from "lucide-react-native";
 
-import { AppText, Card, Chip } from "@/src/components/ui";
+import { AppText, Button, Card, Chip } from "@/src/components/ui";
 import { useApp } from "@/src/context/AppContext";
+import { usePurchases } from "@/src/context/PurchaseContext";
 import { colors, radius, spacing } from "@/src/theme";
 import { AppLocale } from "@/src/i18n";
 import {
@@ -31,6 +32,15 @@ export default function SettingsScreen() {
     setDefaultReminders,
   } = useApp();
   const insets = useSafeAreaInsets();
+  const {
+    available: iapAvailable,
+    ownsRemoveAds,
+    priceLabel,
+    purchasing,
+    error: purchaseError,
+    buyRemoveAds,
+    restorePurchases,
+  } = usePurchases();
 
   const [notifGranted, setNotifGranted] = useState<boolean | null>(null);
 
@@ -156,15 +166,62 @@ export default function SettingsScreen() {
           )}
         </Card>
 
-        {/* Premium (architecture only) */}
+        {/* Remove ads (one-time in-app purchase) */}
         <Card style={styles.card}>
           <View style={styles.cardHeader}>
             <Crown size={20} color={colors.secondary} strokeWidth={1.8} />
-            <AppText variant="bodySemi">{t("settings.premium")}</AppText>
+            <AppText variant="bodySemi">{t("removeAds.title")}</AppText>
           </View>
-          <AppText variant="small" color={colors.textSecondary}>
-            {t("settings.premiumDesc")}
-          </AppText>
+          {ownsRemoveAds ? (
+            <View style={styles.ownedRow}>
+              <Check size={18} color={colors.primary} strokeWidth={2.2} />
+              <View style={styles.flex1}>
+                <AppText variant="bodyMedium" color={colors.primary}>
+                  {t("removeAds.owned")}
+                </AppText>
+                <AppText variant="small" color={colors.textSecondary}>
+                  {t("removeAds.ownedDesc")}
+                </AppText>
+              </View>
+            </View>
+          ) : (
+            <>
+              <AppText variant="small" color={colors.textSecondary}>
+                {t("removeAds.desc")}
+              </AppText>
+              {purchaseError ? (
+                <AppText variant="small" color={colors.danger}>
+                  {purchaseError}
+                </AppText>
+              ) : null}
+              <Button
+                testID="settings-remove-ads-buy"
+                label={
+                  priceLabel
+                    ? `${t("removeAds.buy")} · ${priceLabel}`
+                    : t("removeAds.buy")
+                }
+                onPress={buyRemoveAds}
+                loading={purchasing}
+                disabled={!iapAvailable}
+                size="md"
+              />
+              {iapAvailable ? (
+                <Button
+                  testID="settings-remove-ads-restore"
+                  label={t("removeAds.restore")}
+                  onPress={restorePurchases}
+                  variant="ghost"
+                  size="md"
+                  disabled={purchasing}
+                />
+              ) : (
+                <AppText variant="small" color={colors.textMuted}>
+                  {t("removeAds.unavailable")}
+                </AppText>
+              )}
+            </>
+          )}
         </Card>
 
         {/* Privacy */}
@@ -205,6 +262,8 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: spacing.screen, paddingBottom: spacing.xxl },
   title: { marginBottom: spacing.lg },
   card: { marginBottom: spacing.md, gap: spacing.md },
+  flex1: { flex: 1 },
+  ownedRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   cardHeader: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   optionList: { gap: 2 },
   optionRow: {

@@ -7,6 +7,7 @@ import mobileAds, {
 } from "react-native-google-mobile-ads";
 
 import { getProductionBannerUnitId, shouldShowAds, USE_TEST_ADS } from "@/src/config/ads";
+import { usePurchases } from "@/src/context/PurchaseContext";
 import { colors } from "@/src/theme";
 
 // Initialize the Google Mobile Ads SDK exactly once for the whole app.
@@ -29,12 +30,13 @@ const BANNER_UNIT_ID = USE_TEST_ADS
 
 export function AdBanner() {
   const [failed, setFailed] = useState(false);
+  const { ownsRemoveAds } = usePurchases();
 
   useEffect(() => {
     ensureSdkInitialized();
   }, []);
 
-  if (!shouldShowAds() || failed) return null;
+  if (!shouldShowAds() || ownsRemoveAds || failed) return null;
 
   return (
     <View style={styles.container}>
