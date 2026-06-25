@@ -63,7 +63,7 @@ export default function HomeScreen() {
           style={{
             width: watermarkSize,
             height: watermarkSize,
-            opacity: 0.1,
+            opacity: 0.12,
           }}
           resizeMode="contain"
         />
