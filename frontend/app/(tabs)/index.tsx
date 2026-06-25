@@ -4,6 +4,7 @@ import {
   ScrollView,
   StyleSheet,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -29,6 +30,8 @@ export default function HomeScreen() {
   const { t, locale, dataVersion } = useApp();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { width: screenWidth } = useWindowDimensions();
+  const watermarkSize = Math.round(screenWidth * 0.82);
 
   const [expiring, setExpiring] = useState<InventoryItem[]>([]);
   const [recent, setRecent] = useState<Receipt[]>([]);
@@ -54,12 +57,17 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={require("@/assets/images/brand-watermark.png")}
-        style={styles.watermark}
-        pointerEvents="none"
-        resizeMode="contain"
-      />
+      <View style={styles.watermarkWrap} pointerEvents="none">
+        <Image
+          source={require("@/assets/images/brand-watermark.png")}
+          style={{
+            width: watermarkSize,
+            height: watermarkSize,
+            opacity: 0.1,
+          }}
+          resizeMode="contain"
+        />
+      </View>
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -207,13 +215,11 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
-  watermark: {
-    position: "absolute",
-    top: -56,
-    right: -118,
-    width: 460,
-    height: 496,
-    opacity: 0.06,
+  watermarkWrap: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 0,
   },
   content: {
     paddingHorizontal: spacing.screen,
