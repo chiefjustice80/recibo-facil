@@ -1,5 +1,6 @@
 import React, { useCallback, useState } from "react";
 import {
+  Image,
   ScrollView,
   StyleSheet,
   TouchableOpacity,
@@ -53,6 +54,12 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
+      <Image
+        source={require("@/assets/images/brand-watermark.png")}
+        style={styles.watermark}
+        pointerEvents="none"
+        resizeMode="contain"
+      />
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -60,9 +67,6 @@ export default function HomeScreen() {
         ]}
         showsVerticalScrollIndicator={false}
       >
-        <AppText variant="caption" color={colors.secondary}>
-          {t("common.appName")}
-        </AppText>
         <AppText variant="h1" style={styles.title}>
           {t("home.subtitle")}
         </AppText>
@@ -203,6 +207,14 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: colors.background },
+  watermark: {
+    position: "absolute",
+    top: -56,
+    right: -118,
+    width: 460,
+    height: 496,
+    opacity: 0.06,
+  },
   content: {
     paddingHorizontal: spacing.screen,
     paddingBottom: spacing.xxl,
