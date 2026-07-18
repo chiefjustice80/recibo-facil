@@ -18,7 +18,9 @@ import { X, Trash2, Camera, ImageIcon } from "lucide-react-native";
 
 import { AppText, Button, Field } from "@/src/components/ui";
 import { AppInput, DateField } from "@/src/components/inputs";
+import { LimitReached } from "@/src/components/LimitReached";
 import { useApp } from "@/src/context/AppContext";
+import { useUsage } from "@/src/hooks/useUsage";
 import { colors, radius, spacing } from "@/src/theme";
 import {
   getReceipt,
@@ -45,6 +47,8 @@ export default function ReceiptAddScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
   const editing = !!params.id;
+  const usage = useUsage();
+  const blocked = !editing && !usage.canAddReceipt;
 
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [originalImage, setOriginalImage] = useState<string | null>(null);
@@ -179,6 +183,25 @@ export default function ReceiptAddScreen() {
       },
     });
   }, [params.id, t, refresh, router]);
+
+  if (blocked) {
+    return (
+      <View style={styles.container}>
+        <View style={[styles.topBar, { paddingTop: insets.top + spacing.sm }]}>
+          <TouchableOpacity
+            testID="rec-close"
+            onPress={() => router.back()}
+            hitSlop={10}
+          >
+            <X size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <AppText variant="h3">{t("receipts.addReceipt")}</AppText>
+          <View style={{ width: 24 }} />
+        </View>
+        <LimitReached onClose={() => router.back()} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

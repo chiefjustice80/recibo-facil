@@ -13,10 +13,9 @@
 
 import Constants from "expo-constants";
 
-import { isPremium } from "@/src/config/limits";
-
-// Master switch for showing ads. Disabled automatically for Premium users so a
-// future in-app purchase can simply flip `isPremium` to remove all ads.
+// Master switch for showing ads. Ad ownership (Organiza Pro / remove_ads) is
+// checked separately in AdBanner via the purchase state, so ads disappear
+// app-wide once purchased.
 export const ADS_ENABLED = true;
 
 // Use Google's TEST ad units in development builds to avoid invalid-traffic
@@ -24,7 +23,7 @@ export const ADS_ENABLED = true;
 export const USE_TEST_ADS = __DEV__;
 
 export function shouldShowAds(): boolean {
-  return ADS_ENABLED && !isPremium;
+  return ADS_ENABLED;
 }
 
 // Returns the configured production banner unit ID, or null when none is set

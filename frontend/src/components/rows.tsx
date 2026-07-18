@@ -6,6 +6,7 @@ import {
   Snowflake,
   Archive,
   Box,
+  MapPin,
   ReceiptText,
   ShieldCheck,
 } from "lucide-react-native";
@@ -21,6 +22,7 @@ const LOCATION_ICON: Record<StorageLocation, React.ComponentType<any>> = {
   freezer: Snowflake,
   pantry: Archive,
   other: Box,
+  custom: MapPin,
 };
 
 function urgencyTone(iso: string | null): "neutral" | "danger" | "warning" | "success" {
@@ -41,7 +43,9 @@ export function InventoryRow({ item, onPress, testID }: InventoryRowProps) {
   const { t } = useApp();
   const Icon = LOCATION_ICON[item.storage_location] || Box;
   const subtitleParts = [
-    t(`locations.${item.storage_location}`),
+    item.storage_location === "custom" && item.custom_location
+      ? item.custom_location
+      : t(`locations.${item.storage_location}`),
     item.quantity ? `· ${item.quantity}` : null,
     item.brand ? `· ${item.brand}` : null,
   ].filter(Boolean);

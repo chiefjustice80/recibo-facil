@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS inventory_items (
   brand TEXT,
   quantity TEXT,
   storage_location TEXT NOT NULL DEFAULT 'pantry',
+  custom_location TEXT,
   expiry_date TEXT,
   status TEXT NOT NULL DEFAULT 'active',
   reminder_offsets TEXT NOT NULL DEFAULT '[1]',
@@ -76,6 +77,19 @@ CREATE INDEX IF NOT EXISTS idx_notif_entity
   ON notification_settings(entity_type, entity_id);
 `;
 
+// Additive, idempotent migrations for existing installs. Each ALTER is wrapped
+// so a "duplicate column" error on already-migrated DBs is ignored. No data is
+// ever deleted or rewritten.
+async function runMigrations(db: SQLite.SQLiteDatabase): Promise<void> {
+  try {
+    await db.execAsync(
+      `ALTER TABLE inventory_items ADD COLUMN custom_location TEXT`,
+    );
+  } catch {
+    // column already exists — nothing to do
+  }
+}
+
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase | null> {
   if (dbInstance) return dbInstance;
   if (initPromise) return initPromise;
@@ -84,6 +98,7 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase | null> {
     try {
       const db = await SQLite.openDatabaseAsync("belegguard.db");
       await db.execAsync(SCHEMA);
+      await runMigrations(db);
       // Build the full-text index (best-effort; falls back to LIKE if FTS5 is
       // unavailable). Never blocks app boot.
       await setupFts(db);

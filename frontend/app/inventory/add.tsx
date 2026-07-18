@@ -19,13 +19,16 @@ import {
   Snowflake,
   Archive,
   Box,
+  MapPin,
 } from "lucide-react-native";
 
 import { AppText, Button, Chip, Field } from "@/src/components/ui";
 import { AppInput, DateField } from "@/src/components/inputs";
 import { BarcodeScannerModal } from "@/src/components/BarcodeScannerModal";
+import { LimitReached } from "@/src/components/LimitReached";
 import { confirmAction } from "@/src/utils/confirm";
 import { useApp } from "@/src/context/AppContext";
+import { useUsage } from "@/src/hooks/useUsage";
 import { colors, radius, spacing } from "@/src/theme";
 import {
   getInventoryItem,
@@ -44,6 +47,7 @@ const LOCATIONS: { value: StorageLocation; Icon: React.ComponentType<any> }[] = 
   { value: "freezer", Icon: Snowflake },
   { value: "pantry", Icon: Archive },
   { value: "other", Icon: Box },
+  { value: "custom", Icon: MapPin },
 ];
 
 const REMINDER_OPTIONS = [0, 1, 3, 7];
@@ -54,12 +58,15 @@ export default function InventoryAddScreen() {
   const insets = useSafeAreaInsets();
   const params = useLocalSearchParams<{ id?: string }>();
   const editing = !!params.id;
+  const usage = useUsage();
+  const blocked = !editing && !usage.canAddProduct;
 
   const [barcode, setBarcode] = useState("");
   const [name, setName] = useState("");
   const [brand, setBrand] = useState("");
   const [quantity, setQuantity] = useState("");
   const [location, setLocation] = useState<StorageLocation>("pantry");
+  const [customLocation, setCustomLocation] = useState("");
   const [expiry, setExpiry] = useState<string | null>(null);
   const [reminders, setReminders] = useState<number[]>(defaultReminders);
   const [status, setStatus] = useState<ItemStatus>("active");
@@ -79,6 +86,7 @@ export default function InventoryAddScreen() {
         setBrand(item.brand ?? "");
         setQuantity(item.quantity ?? "");
         setLocation(item.storage_location);
+        setCustomLocation(item.custom_location ?? "");
         setExpiry(item.expiry_date);
         setReminders(item.reminder_offsets);
         setStatus(item.status);
@@ -128,6 +136,8 @@ export default function InventoryAddScreen() {
 
   const handleSave = useCallback(async () => {
     if (!name.trim()) return;
+    if (location === "custom" && !customLocation.trim()) return;
+    if (blocked) return;
     setSaving(true);
     const id = await upsertInventoryItem({
       id: params.id,
@@ -136,6 +146,7 @@ export default function InventoryAddScreen() {
       brand: brand || null,
       quantity: quantity || null,
       storage_location: location,
+      custom_location: location === "custom" ? customLocation.trim() : null,
       expiry_date: expiry,
       status,
       reminder_offsets: reminders,
@@ -151,10 +162,12 @@ export default function InventoryAddScreen() {
     brand,
     quantity,
     location,
+    customLocation,
     expiry,
     status,
     reminders,
     params.id,
+    blocked,
     refresh,
     router,
   ]);
@@ -173,6 +186,25 @@ export default function InventoryAddScreen() {
       },
     });
   }, [params.id, t, refresh, router]);
+
+  if (blocked) {
+    return (
+      <View style={styles.container}>
+        <View style={[styles.topBar, { paddingTop: insets.top + spacing.sm }]}>
+          <TouchableOpacity
+            testID="inv-close"
+            onPress={() => router.back()}
+            hitSlop={10}
+          >
+            <X size={24} color={colors.textPrimary} />
+          </TouchableOpacity>
+          <AppText variant="h3">{t("inventory.addProduct")}</AppText>
+          <View style={{ width: 24 }} />
+        </View>
+        <LimitReached onClose={() => router.back()} />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -290,6 +322,20 @@ export default function InventoryAddScreen() {
           </View>
         </Field>
 
+        {/* Custom storage location */}
+        {location === "custom" ? (
+          <Field label={t("inventory.customLocationLabel")}>
+            <AppInput
+              testID="inv-custom-location"
+              value={customLocation}
+              onChangeText={setCustomLocation}
+              placeholder={t("inventory.customLocationPlaceholder")}
+              maxLength={40}
+              autoCapitalize="sentences"
+            />
+          </Field>
+        ) : null}
+
         {/* Expiry */}
         <Field label={t("inventory.expiryDate")} hint={t("common.optional")}>
           <DateField
@@ -341,7 +387,10 @@ export default function InventoryAddScreen() {
             label={t("common.save")}
             onPress={handleSave}
             loading={saving}
-            disabled={!name.trim()}
+            disabled={
+              !name.trim() ||
+              (location === "custom" && !customLocation.trim())
+            }
           />
         </View>
       </KeyboardStickyView>

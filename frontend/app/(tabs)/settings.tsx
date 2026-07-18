@@ -15,6 +15,7 @@ import {
 import { AppText, Button, Card, Chip } from "@/src/components/ui";
 import { useApp } from "@/src/context/AppContext";
 import { usePurchases } from "@/src/context/PurchaseContext";
+import { useUsage } from "@/src/hooks/useUsage";
 import { colors, radius, spacing } from "@/src/theme";
 import { AppLocale } from "@/src/i18n";
 import {
@@ -42,6 +43,7 @@ export default function SettingsScreen() {
     buyRemoveAds,
     restorePurchases,
   } = usePurchases();
+  const usage = useUsage();
 
   const [notifGranted, setNotifGranted] = useState<boolean | null>(null);
 
@@ -190,6 +192,24 @@ export default function SettingsScreen() {
               <AppText variant="small" color={colors.textSecondary}>
                 {t("removeAds.desc")}
               </AppText>
+              <View style={styles.usageRow}>
+                <View style={styles.usagePill}>
+                  <AppText variant="small" color={colors.textSecondary}>
+                    {t("removeAds.usageProducts", {
+                      count: usage.productCount,
+                      limit: usage.productLimit,
+                    })}
+                  </AppText>
+                </View>
+                <View style={styles.usagePill}>
+                  <AppText variant="small" color={colors.textSecondary}>
+                    {t("removeAds.usageReceipts", {
+                      count: usage.receiptCount,
+                      limit: usage.receiptLimit,
+                    })}
+                  </AppText>
+                </View>
+              </View>
               {purchaseError ? (
                 <AppText variant="small" color={colors.danger}>
                   {purchaseError}
@@ -265,6 +285,13 @@ const styles = StyleSheet.create({
   card: { marginBottom: spacing.md, gap: spacing.md },
   flex1: { flex: 1 },
   ownedRow: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
+  usageRow: { flexDirection: "row", flexWrap: "wrap", gap: spacing.sm },
+  usagePill: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: 6,
+    borderRadius: radius.pill,
+    backgroundColor: colors.inputBg,
+  },
   cardHeader: { flexDirection: "row", alignItems: "center", gap: spacing.sm },
   optionList: { gap: 2 },
   optionRow: {

@@ -1,6 +1,11 @@
 // Shared domain types for the local-first data model.
 
-export type StorageLocation = "fridge" | "freezer" | "pantry" | "other";
+export type StorageLocation =
+  | "fridge"
+  | "freezer"
+  | "pantry"
+  | "other"
+  | "custom";
 export type ItemStatus = "active" | "consumed" | "discarded";
 
 export interface InventoryItem {
@@ -10,6 +15,7 @@ export interface InventoryItem {
   brand: string | null;
   quantity: string | null;
   storage_location: StorageLocation;
+  custom_location: string | null; // free-text label when storage_location === "custom"
   expiry_date: string | null; // ISO YYYY-MM-DD
   status: ItemStatus;
   reminder_offsets: number[]; // days before expiry, e.g. [0, 1, 3]

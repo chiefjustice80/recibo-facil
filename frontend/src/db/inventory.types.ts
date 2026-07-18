@@ -10,6 +10,7 @@ export interface InventoryInput {
   brand?: string | null;
   quantity?: string | null;
   storage_location?: StorageLocation;
+  custom_location?: string | null;
   expiry_date?: string | null;
   status?: ItemStatus;
   reminder_offsets?: number[];

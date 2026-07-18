@@ -65,6 +65,10 @@ export async function upsertInventoryItem(
     brand: input.brand?.trim() || null,
     quantity: input.quantity?.trim() || null,
     storage_location: input.storage_location ?? "pantry",
+    custom_location:
+      input.storage_location === "custom"
+        ? input.custom_location?.trim().slice(0, 40) || null
+        : null,
     expiry_date: input.expiry_date ?? null,
     status: input.status ?? "active",
     reminder_offsets: input.reminder_offsets ?? [1],
@@ -103,7 +107,8 @@ export async function searchInventory(
       (i) =>
         i.name.toLowerCase().includes(q) ||
         (i.barcode || "").toLowerCase().includes(q) ||
-        (i.brand || "").toLowerCase().includes(q),
+        (i.brand || "").toLowerCase().includes(q) ||
+        (i.custom_location || "").toLowerCase().includes(q),
     )
     .sort(sortByExpiry);
 }

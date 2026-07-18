@@ -14,6 +14,7 @@ interface Row {
   brand: string | null;
   quantity: string | null;
   storage_location: string;
+  custom_location: string | null;
   expiry_date: string | null;
   status: string;
   reminder_offsets: string;
@@ -36,6 +37,7 @@ function mapRow(r: Row): InventoryItem {
     brand: r.brand,
     quantity: r.quantity,
     storage_location: r.storage_location as StorageLocation,
+    custom_location: r.custom_location,
     expiry_date: r.expiry_date,
     status: r.status as ItemStatus,
     reminder_offsets: offsets,
@@ -79,6 +81,7 @@ export interface InventoryInput {
   brand?: string | null;
   quantity?: string | null;
   storage_location?: StorageLocation;
+  custom_location?: string | null;
   expiry_date?: string | null;
   status?: ItemStatus;
   reminder_offsets?: number[];
@@ -107,15 +110,19 @@ export async function upsertInventoryItem(
     brand: input.brand?.trim() || null,
     quantity: input.quantity?.trim() || null,
     storage_location: input.storage_location ?? "pantry",
+    custom_location:
+      input.storage_location === "custom"
+        ? input.custom_location?.trim().slice(0, 40) || null
+        : null,
     expiry_date: input.expiry_date ?? null,
     status: input.status ?? "active",
   };
 
   await db.runAsync(
     `INSERT OR REPLACE INTO inventory_items
-      (id, barcode, name, brand, quantity, storage_location, expiry_date,
-       status, reminder_offsets, image_path, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      (id, barcode, name, brand, quantity, storage_location, custom_location,
+       expiry_date, status, reminder_offsets, image_path, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       id,
       fields.barcode,
@@ -123,6 +130,7 @@ export async function upsertInventoryItem(
       fields.brand,
       fields.quantity,
       fields.storage_location,
+      fields.custom_location,
       fields.expiry_date,
       fields.status,
       JSON.stringify(input.reminder_offsets ?? [1]),
@@ -186,9 +194,9 @@ export async function searchInventory(
   const rows = await db.getAllAsync<Row>(
     `SELECT * FROM inventory_items
      WHERE name LIKE ? OR barcode LIKE ? OR brand LIKE ?
-        OR quantity LIKE ? OR storage_location LIKE ?
+        OR quantity LIKE ? OR storage_location LIKE ? OR custom_location LIKE ?
      ORDER BY (expiry_date IS NULL) ASC, expiry_date ASC, name ASC`,
-    [q, q, q, q, q],
+    [q, q, q, q, q, q],
   );
   return rows.map(mapRow);
 }

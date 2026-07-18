@@ -20,12 +20,14 @@ export function isFtsAvailable(): boolean {
 }
 
 const FTS_SCHEMA = `
-CREATE VIRTUAL TABLE IF NOT EXISTS inventory_fts USING fts5(
+DROP TABLE IF EXISTS inventory_fts;
+DROP TABLE IF EXISTS receipts_fts;
+CREATE VIRTUAL TABLE inventory_fts USING fts5(
   id UNINDEXED,
-  name, brand, barcode, quantity, storage_location, expiry_date,
+  name, brand, barcode, quantity, storage_location, custom_location, expiry_date,
   tokenize = 'unicode61 remove_diacritics 2'
 );
-CREATE VIRTUAL TABLE IF NOT EXISTS receipts_fts USING fts5(
+CREATE VIRTUAL TABLE receipts_fts USING fts5(
   id UNINDEXED,
   title, merchant, category, notes, amount, purchase_date, warranty_until, return_until,
   tokenize = 'unicode61 remove_diacritics 2'
@@ -36,16 +38,17 @@ CREATE VIRTUAL TABLE IF NOT EXISTS receipts_fts USING fts5(
 // Returns true if FTS5 is usable. On any failure the app keeps working via LIKE.
 export async function setupFts(db: SQLite.SQLiteDatabase): Promise<boolean> {
   try {
+    // DROP + CREATE ensures the FTS schema always matches the current column set
+    // (e.g. after adding custom_location) — the index is rebuilt from the base
+    // tables below, so nothing is lost.
     await db.execAsync(FTS_SCHEMA);
-    // Rebuild from source of truth — idempotent and safe (base tables untouched).
-    await db.execAsync(`DELETE FROM inventory_fts; DELETE FROM receipts_fts;`);
     await db.runAsync(
       `INSERT INTO inventory_fts
-        (id, name, brand, barcode, quantity, storage_location, expiry_date)
+        (id, name, brand, barcode, quantity, storage_location, custom_location, expiry_date)
        SELECT id,
               COALESCE(name, ''), COALESCE(brand, ''), COALESCE(barcode, ''),
               COALESCE(quantity, ''), COALESCE(storage_location, ''),
-              COALESCE(expiry_date, '')
+              COALESCE(custom_location, ''), COALESCE(expiry_date, '')
        FROM inventory_items`,
     );
     await db.runAsync(
@@ -90,6 +93,7 @@ interface InvFtsFields {
   barcode?: string | null;
   quantity?: string | null;
   storage_location?: string | null;
+  custom_location?: string | null;
   expiry_date?: string | null;
 }
 
@@ -102,8 +106,8 @@ export async function syncInventoryFts(
     await db.runAsync(`DELETE FROM inventory_fts WHERE id = ?`, [item.id]);
     await db.runAsync(
       `INSERT INTO inventory_fts
-        (id, name, brand, barcode, quantity, storage_location, expiry_date)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+        (id, name, brand, barcode, quantity, storage_location, custom_location, expiry_date)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         item.id,
         item.name ?? "",
@@ -111,6 +115,7 @@ export async function syncInventoryFts(
         item.barcode ?? "",
         item.quantity ?? "",
         item.storage_location ?? "",
+        item.custom_location ?? "",
         item.expiry_date ?? "",
       ],
     );
